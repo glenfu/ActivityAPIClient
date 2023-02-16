@@ -2,7 +2,6 @@
 {
     using System;
     using System.Configuration;
-    using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
@@ -11,7 +10,7 @@
         private static string AuthorityUrl = ConfigurationManager.AppSettings["AAD:AuthorityUrl"];
         private static string ClientId = ConfigurationManager.AppSettings["AAD:ClientId"];
         private static string ClientKey = ConfigurationManager.AppSettings["AAD:ClientKey"];
-        private static Uri ClientRedirectUri = new Uri(ConfigurationManager.AppSettings["AAD:ClientRedirectUri"]);
+        //private static Uri ClientRedirectUri = new Uri(ConfigurationManager.AppSettings["AAD:ClientRedirectUri"]);
         private static string ResourceID = ConfigurationManager.AppSettings["AAD:ResourceID"];
 
         /// <summary>
