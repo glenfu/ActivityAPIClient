@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ActivityAPIClient": {
+      "commandName": "Project",
+      "commandLineArgs": "start -contenttype Audit.General"
+    }
+  }
+}
