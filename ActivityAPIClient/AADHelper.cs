@@ -3,15 +3,16 @@
     using System;
     using System.Configuration;
     using System.Threading.Tasks;
-    using Microsoft.IdentityModel.Clients.ActiveDirectory;
+    using Microsoft.Identity.Client;
 
     class AADHelper
     {
-        private static string AuthorityUrl = ConfigurationManager.AppSettings["AAD:AuthorityUrl"];
+        //private static string AuthorityUrl = ConfigurationManager.AppSettings["AAD:AuthorityUrl"];
         private static string ClientId = ConfigurationManager.AppSettings["AAD:ClientId"];
         private static string ClientKey = ConfigurationManager.AppSettings["AAD:ClientKey"];
         //private static Uri ClientRedirectUri = new Uri(ConfigurationManager.AppSettings["AAD:ClientRedirectUri"]);
         private static string ResourceID = ConfigurationManager.AppSettings["AAD:ResourceID"];
+        private static IConfidentialClientApplication app;
 
         /// <summary>
         /// Retrieves an access token from AAD using the client app credentials.
@@ -20,23 +21,31 @@
         /// <returns></returns>
         public static async Task<string> AuthenticateAndGetToken(string tenantId)
         {
-            AuthenticationContext authContext = new AuthenticationContext(String.Format(AuthorityUrl, tenantId));
-            ClientCredential clientCredentials = new ClientCredential(AADHelper.ClientId, AADHelper.ClientKey);
-
-            AuthenticationResult result = null;
-            string accessToken;
+            AuthenticationResult authResult = null;
 
             try
             {
-                result = await authContext.AcquireTokenAsync(AADHelper.ResourceID, clientCredentials);
-                accessToken = result.AccessToken;
+                if (app == null)
+                {
+                    app = ConfidentialClientApplicationBuilder.Create(ClientId)
+                        .WithClientSecret(ClientKey)
+                        .Build();
 
-                if (String.IsNullOrEmpty(accessToken))
+                }
+
+                authResult = await app.AcquireTokenForClient(
+                new[] { AADHelper.ResourceID })
+                .WithTenantId(tenantId)
+                // See https://aka.ms/msal.net/withTenantId
+                .ExecuteAsync()
+                .ConfigureAwait(false);
+
+                if (authResult == null)
                 {
                     Console.WriteLine("A token was not received from AAD.");
                 }
             }
-            catch (AdalException ex)
+            catch (Exception ex)
             {
                 string message = ex.Message;
                 if (ex.InnerException != null)
@@ -47,8 +56,7 @@
                 Console.WriteLine("There was an exception when requesting a token from AAD.");
                 Console.WriteLine(message);
             }
-
-            return result.AccessToken;
+            return authResult.AccessToken;
         }
     }
 }
